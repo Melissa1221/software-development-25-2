@@ -1,0 +1,71 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+.venv/
+*.egg-info/
+dist/
+build/
+
+# Flask
+instance/
+.webassets-cache
+*.db
+*.sqlite
+
+# Logs
+*.log
+logs/
+evidencias/
+flask_output.log
+app.log
+
+# Process files
+*.pid
+nohup.out
+
+# Nginx (macOS Homebrew paths)
+/opt/homebrew/var/log/nginx/
+/opt/homebrew/etc/nginx/servers/miapp.conf
+
+# Certificates (opcional - descomenta si no quieres versionar certificados)
+# certs/
+# *.crt
+# *.key
+# *.pem
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Testing
+.coverage
+htmlcov/
+.pytest_cache/
+.tox/
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.bak
+*.backup
+
+# Output files from the activity
+curl_*.txt
+output_*.txt
+response_*.json
