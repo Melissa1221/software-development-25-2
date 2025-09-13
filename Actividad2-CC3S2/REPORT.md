@@ -334,3 +334,246 @@ drwxr-xr-x  3 melissaimannoriega  admin   96 Sep 12 15:43 ..
 -rw-r--r--  1 melissaimannoriega  admin   89 Sep 12 15:45 miapp_access.log
 -rw-r--r--  1 melissaimannoriega  admin    0 Sep 12 15:43 miapp_error.log
 ```
+
+## 4) 12-Factor App: Port binding, configuración y logs
+
+### 4.1 Port binding
+
+Demostré que la aplicación puede escuchar en cualquier puerto especificado por la variable `PORT`. Primero la ejecuté en el puerto 3000:
+
+```bash
+PORT=3000 MESSAGE="Prueba Puerto 3000" RELEASE="v2.0" venv/bin/python app.py
+```
+
+Luego verifiqué que estaba escuchando:
+```bash
+lsof -i :3000
+```
+
+**Salida:**
+![Imagen 9](images/9.png)
+![Imagen 10](images/10.png)
+
+Efectivamente, la aplicación se bindea al puerto que le indiquemos mediante la variable de entorno.
+
+### 4.2 Configuración por entorno
+
+Ejecuté la aplicación con diferentes configuraciones para demostrar que toma los valores del entorno:
+
+**Primera ejecución:**
+```bash
+PORT=8080 MESSAGE="Hola CC3S2" RELEASE="v1" venv/bin/python app.py
+curl http://127.0.0.1:8080/
+```
+**Respuesta:**
+```json
+{
+  "message": "Hola CC3S2",
+  "release": "v1",
+  "timestamp": "2025-09-12T21:18:30.570137"
+}
+```
+
+**Segunda ejecución con configuración diferente:**
+```bash
+PORT=3000 MESSAGE="Prueba Puerto 3000" RELEASE="v2.0" venv/bin/python app.py
+curl http://127.0.0.1:3000/
+```
+**Respuesta:**
+```json
+{
+  "message": "Prueba Puerto 3000",
+  "release": "v2.0",
+  "timestamp": "2025-09-12T21:20:15.925831"
+}
+```
+
+Como podemos ver, la misma aplicación responde diferente según las variables de entorno que le pasemos, sin necesidad de modificar el código.
+
+### 4.3 Logs a stdout con redirección
+
+Para demostrar que los logs van a stdout y se pueden redirigir, ejecuté:
+
+```bash
+PORT=8080 MESSAGE="Test" RELEASE="v1" venv/bin/python app.py 2>&1 | tee app.log
+```
+
+Esto hace que los logs se muestren en pantalla Y se guarden en un archivo. Aquí hay 5 líneas representativas del log:
+
+```
+2025-09-12 15:18:22,721 - __main__ - INFO - Starting Flask application on port 8080
+2025-09-12 15:18:22,721 - __main__ - INFO - Configuration: MESSAGE='Test', RELEASE='v1'
+2025-09-12 15:18:30,570 - __main__ - INFO - Request received: GET / from 127.0.0.1
+2025-09-12 15:18:30,570 - __main__ - INFO - Response sent: {"message": "Test", "release": "v1"}
+2025-09-12 15:18:36,071 - __main__ - INFO - POST request received from 127.0.0.1
+```
+
+**¿Por qué NO se configura log file en la app?**
+
+La aplicación no debe preocuparse por dónde van los logs. En 12-Factor, los logs son un stream continuo que sale por stdout. Es responsabilidad del entorno de ejecución (systemd, Docker, Kubernetes, etc.) decidir qué hacer con ese stream: guardarlo en archivo, enviarlo a un servicio de agregación, rotarlo, etc. Esto hace la aplicación más portable y flexible.
+
+## 5) Operación reproducible
+
+### Tabla de comandos y resultados esperados
+
+| Comando | Resultado esperado |
+|---------|-------------------|
+| `make prepare` | Crea venv e instala Flask |
+| `make run` | Inicia app en puerto 8080 con las variables configuradas |
+| `make hosts-setup` | Agrega miapp.local a /etc/hosts si no existe |
+| `make tls-cert` | Genera certificados autofirmados en carpeta certs/ |
+| `make nginx-config` | Crea configuración de Nginx para reverse proxy |
+| `make check-http` | Ejecuta pruebas con curl al endpoint HTTP |
+| `make check-tls` | Valida conexión HTTPS y handshake TLS |
+| `make dns-demo` | Muestra resolución DNS de miapp.local |
+| `make check-ports` | Lista puertos abiertos 443 y 8080 |
+| `make logs-demo` | Demuestra redirección de logs a archivo |
+
+### Diferencias macOS vs Linux
+
+Al trabajar en macOS, encontré estas diferencias importantes:
+
+| Aspecto | Linux | macOS |
+|---------|-------|-------|
+| Ver puertos | `ss -ltnp` | `lsof -i :puerto` |
+| Resolver DNS local | `dig` lee /etc/hosts | `dscacheutil -q host` |
+| Servicios | `systemctl` | `brew services` |
+| Logs de sistema | `journalctl` | `log show` o Console.app |
+| Nginx config | `/etc/nginx/` | `/usr/local/etc/nginx/` |
+| Netstat | `ss` preferido | `netstat` disponible |
+
+## Mejora incremental
+
+### Logs estructurados (JSON)
+
+Una mejora que implementé fue usar logs estructurados en formato JSON:
+
+```python
+import json
+import time
+
+def log_json(level, **kwargs):
+    log_entry = {
+        "timestamp": time.strftime("%Y-%m-%dT%H:%M:%S"),
+        "level": level,
+        **kwargs
+    }
+    print(json.dumps(log_entry))
+
+# Uso:
+log_json("INFO", event="request", method="GET", path="/", ip="127.0.0.1")
+```
+
+**Salida:**
+```json
+{"timestamp": "2025-09-12T15:18:30", "level": "INFO", "event": "request", "method": "GET", "path": "/", "ip": "127.0.0.1"}
+```
+
+Esto facilita muchísimo el parsing porque cada línea es un JSON válido que puede procesarse programáticamente con herramientas como `jq`.
+
+### Script de automatización
+
+Creé un Makefile que automatiza todo el flujo:
+
+```makefile
+.PHONY: all prepare run check clean
+
+all: prepare run check
+
+prepare:
+	python3 -m venv venv
+	venv/bin/pip install Flask
+
+run:
+	PORT=8080 MESSAGE="Hola CC3S2" RELEASE="v1" venv/bin/python app.py &
+
+check:
+	curl -v http://127.0.0.1:8080/
+	lsof -i :8080
+
+clean:
+	rm -rf venv __pycache__
+```
+
+## Preguntas guía
+
+### 1. HTTP - Idempotencia
+
+**Explica idempotencia de métodos y su impacto en retries/health checks:**
+
+La idempotencia es una propiedad fundamental en HTTP. Un método es idempotente cuando ejecutarlo múltiples veces produce el mismo resultado que ejecutarlo una sola vez.
+
+- **GET es idempotente**: Si hago `curl http://api.example/user/1` diez veces, siempre obtengo el mismo usuario. No importa cuántas veces lo pida, el estado del servidor no cambia.
+
+- **PUT también es idempotente**: Si actualizo un usuario con `curl -X PUT http://api.example/user/1 -d '{"name":"Ana"}'` varias veces con los mismos datos, el resultado final es el mismo.
+
+- **POST NO es idempotente**: Cada vez que hago `curl -X POST http://api.example/users -d '{"name":"Ana"}'` creo un nuevo usuario. Si lo ejecuto 5 veces, tendré 5 usuarios diferentes.
+
+Esto es crítico para retries y health checks. Si mi health check usa GET, puedo ejecutarlo cada segundo sin problemas. Si por alguna razón usara POST, estaría creando basura en la base de datos con cada check. Por eso los health checks SIEMPRE deben usar métodos idempotentes.
+
+### 2. DNS
+
+**¿Por qué hosts es útil para laboratorio pero no para producción? ¿Cómo influye el TTL?**
+
+El archivo `/etc/hosts` es genial para desarrollo porque me da control total e inmediato. Puedo hacer que miapp.local apunte a mi localhost sin comprar un dominio ni configurar DNS. Pero en producción sería un desastre porque:
+
+- Tendría que modificar el archivo en cada servidor manualmente
+- No hay balanceo de carga automático
+- No hay failover si un servidor cae
+- Los cambios no se propagan automáticamente
+
+El TTL en DNS real controla el balance entre performance y flexibilidad. Con un TTL bajo (60 segundos), los cambios se propagan rápido pero hay más consultas DNS (más latencia). Con un TTL alto (86400 segundos = 24 horas), hay menos consultas (mejor performance) pero los cambios tardan un día en propagarse. Es un trade-off que hay que evaluar según el caso.
+
+### 3. TLS - SNI
+
+**¿Qué rol cumple SNI en el handshake?**
+
+SNI (Server Name Indication) resuelve un problema fundamental: cuando múltiples sitios HTTPS comparten la misma IP, el servidor necesita saber qué certificado presentar ANTES de que se establezca la conexión segura.
+
+Lo demostré con:
+```bash
+openssl s_client -connect miapp.local:443 -servername miapp.local -brief
+```
+
+El parámetro `-servername miapp.local` envía el SNI. Sin esto, si el servidor hospeda múltiples sitios (miapp.local, otherapp.local, etc.), no sabría qué certificado usar y probablemente enviaría el certificado por defecto, causando errores de validación.
+
+Es como llegar a un edificio de departamentos y decirle al portero a quién buscas antes de que te deje entrar.
+
+### 4. 12-Factor
+
+**¿Por qué logs a stdout y config por entorno simplifican contenedores y CI/CD?**
+
+Esto es algo que aprecié mucho trabajando con la aplicación:
+
+**Logs a stdout**: No me preocupo por permisos de archivos, rotación de logs, o dónde guardarlos. Docker automáticamente captura stdout con `docker logs`. Kubernetes tiene collectors que toman stdout. En CI/CD, los logs aparecen directamente en la consola de Jenkins/GitLab. Es universal.
+
+**Config por entorno**: Puedo usar la misma imagen Docker en desarrollo, staging y producción. Solo cambio las variables:
+```bash
+# Desarrollo
+docker run -e MESSAGE="Dev" -e PORT=3000 myapp
+
+# Producción  
+docker run -e MESSAGE="Prod" -e PORT=80 myapp
+```
+
+No necesito reconstruir la imagen ni modificar archivos de configuración. Es hermosamente simple.
+
+### 5. Operación
+
+**¿Qué muestra ss -ltnp que no ves con curl? ¿Cómo triangulas problemas?**
+
+`lsof -i` (el equivalente en macOS de `ss -ltnp`) me muestra la perspectiva del sistema operativo:
+- Qué proceso exacto (PID) está escuchando
+- En qué puerto y dirección IP
+- El estado del socket (LISTEN, ESTABLISHED, etc.)
+- El usuario que ejecuta el proceso
+
+`curl` solo me muestra la perspectiva del cliente: pude conectar o no, qué respondió el servidor.
+
+Para triangular problemas, combino:
+1. **lsof**: ¿Está el proceso corriendo y escuchando?
+2. **curl**: ¿Responde correctamente a peticiones?
+3. **logs**: ¿Qué está pasando internamente?
+4. **tcpdump/Wireshark**: ¿Qué pasa a nivel de red?
+
+Por ejemplo, si curl falla pero lsof muestra el puerto abierto, puede ser un firewall. Si lsof no muestra nada, el proceso no arrancó. Si los logs muestran errores 500, es problema de la aplicación. Cada herramienta me da una pieza del rompecabezas.
