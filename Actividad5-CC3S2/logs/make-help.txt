@@ -1,0 +1,14 @@
+  all           Construir, testear y empaquetar todo
+  build         Generar out/hello.txt
+  test          Ejecutar tests
+  package       Crear dist/app.tar.gz
+  lint          Lint Bash y (opcional) Python
+  tools         Verificar dependencias
+  check         Ejecutar lint y tests
+  benchmark     Medir tiempo de ejecución
+  format        Formatear scripts con shfmt
+  dist-clean    Limpiar todo (incluye caches opcionales)
+  verify-repro  Verificar que dist/app.tar.gz sea 100% reproducible
+  clean         Limpiar archivos generados
+  help          Mostrar ayuda
+11:.PHONY: all build test package clean help lint tools check benchmark format dist-clean verify-repro

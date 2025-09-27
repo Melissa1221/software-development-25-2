@@ -1,0 +1,2 @@
+exit=
+ls: out/hello.txt: No such file or directory

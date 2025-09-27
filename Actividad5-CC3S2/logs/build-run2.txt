@@ -1,0 +1,2 @@
+make: Nothing to be done for `build'.
+16777234 7991253 -rw-r--r-- 1 melissaimannoriega staff 0 14 "Sep 27 08:48:28 2025" "Sep 27 08:48:26 2025" "Sep 27 08:48:26 2025" "Sep 27 08:48:26 2025" 4096 8 0 out/hello.txt

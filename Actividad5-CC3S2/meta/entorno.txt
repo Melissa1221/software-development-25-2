@@ -1,0 +1,8 @@
+Sistema Operativo: macOS 15.0 (Darwin 24.5.0)
+Shell: bash 5.2 / zsh 5.9
+Make: GNU Make 3.81
+Python: Python 3.9.6
+GNU Tar: gtar 1.35 (instalado via Homebrew)
+sha256sum: GNU coreutils
+Git: git version 2.39.2
+Fecha: $(date)
