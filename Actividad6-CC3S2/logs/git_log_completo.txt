@@ -1,0 +1,23 @@
+* 71210ea feat: Agrega función experimental importante
+| * 93b20d7 feat: Agrega función experimental importante
+|/  
+*   b986a41 Merge pull request: Agrega API endpoints básicos
+|\  
+| * 8a56bb5 chore: Agrega requirements.txt con dependencias
+| * 15c2480 feat: Agrega endpoint API REST básico
+|/  
+* 02fbf6b Re-commit: Agrega test.py después de soft reset
+*   b85649d Fusiona hotfix crítico en main
+|\  
+| * 08eaaff Aplica corrección crítica en hotfix
+* | d5e0bb7 Revert "Agrega utils.py con función de suma"
+* | 0c4ae76 Agrega utils.py con función de suma
+* |   c9670d2 Resuelve el conflicto de fusión entre la versión main y feature/advanced-feature
+|\ \  
+| * | 7f688e6 Agrega la funcion greet como función avanzada
+* | | d4275d8 Actualizar el mensaje main.py en la rama main
+|/ /  
+* / 22d9796 Agrega main.py
+|/  
+* de7b566 Configura la documentación base del repositorio
+* fbf79ae Commit inicial con README.md

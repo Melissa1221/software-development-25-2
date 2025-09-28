@@ -1,0 +1,4 @@
+[main 3ce7f90] feat: función experimental
+ Date: Sat Sep 27 11:29:12 2025 -0600
+ 1 file changed, 2 insertions(+)
+ create mode 100644 experimental.py

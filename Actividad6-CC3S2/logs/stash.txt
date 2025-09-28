@@ -1,0 +1,3 @@
+Saved working directory and index state On main: trabajo en progreso
+git stash list:
+stash@{0}: On main: trabajo en progreso
