@@ -1,0 +1,6 @@
+*   d4df309 (HEAD -> main) merge: integra add-feature con no-ff
+|\  
+| * 2211310 (add-feature) feat: agrega funcionalidad B
+| * ec5000c feat: agrega funcionalidad A
+|/  
+* d913d5c feat: commit inicial

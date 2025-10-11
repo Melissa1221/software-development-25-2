@@ -1,0 +1,6 @@
+*   968eb73 (HEAD -> main) merge: usa estrategia ours para resolver
+|\  
+| * ccc07a2 (feature-x) fix: cambia config
+* | 3d7b001 fix: actualiza config en main
+|/  
+* 65b6ae3 feat: config inicial

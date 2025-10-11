@@ -1,0 +1,6 @@
+*   0dacff8 (HEAD -> main) merge: resuelve conflicto integrando ambos cambios
+|\  
+| * 26af8c7 (feature-update) fix: actualiza t\u00edtulo en feature
+* | 38dbe08 fix: actualiza t\u00edtulo en main
+|/  
+* e4fffc1 feat: commit inicial con index.html
