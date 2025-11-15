@@ -1,7 +1,9 @@
 #test_network_configuration.py
 import json
 import pytest
-CONFIG_FILE = 'network_config.json'
+import os
+
+CONFIG_FILE = os.path.join('pruebas_unitarias', 'network_config.json')
 
 @ pytest.fixture(scope="module")
 def conf():

@@ -1,0 +1,11 @@
+{
+    "resources": [
+        {
+            "type": "local_server",
+            "name": "myserver",
+            "image": "ubuntu-20.04-lts",
+            "cpu": 2,
+            "memory_mb": 2048
+        }
+    ]
+}

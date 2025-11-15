@@ -1,0 +1,22 @@
+{
+    "resources": [
+        {
+            "type": "local_network",
+            "name": "testnet-network",
+            "auto_create_subnets": false,
+            "region": "local-region"
+        },
+        {
+            "type": "local_subnet",
+            "name": "testnet-subnet-0",
+            "network": "testnet-network",
+            "cidr": "10.0.0.0/28"
+        },
+        {
+            "type": "local_subnet",
+            "name": "testnet-subnet-1",
+            "network": "testnet-network",
+            "cidr": "10.0.0.16/28"
+        }
+    ]
+}

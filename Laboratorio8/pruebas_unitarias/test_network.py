@@ -2,7 +2,7 @@
 import pytest
 import json
 import os
-from main import NetworkFactoryLocal
+from pruebas_unitarias.main import NetworkFactoryLocal
 from netaddr import IPNetwork
 
 @ pytest.fixture(scope="module")

@@ -9,7 +9,7 @@ STATE_FILE = 'network_state.json'
 def st(tmp_path_factory):
     # Reutiliza configuración de prueba
     d = tmp_path_factory.mktemp('data2')
-    from main import NetworkFactoryLocal
+    from pruebas_unitarias.main import NetworkFactoryLocal
     NetworkFactoryLocal('tsnet', '10.1.0.0/16', 1).write_files(str(d))
     path = d / 'network_state.json'
     return json.loads(path.read_text())

@@ -1,0 +1,9 @@
+{
+    "resources": [
+        {
+            "type": "local_service",
+            "name": "my-service",
+            "port": 0
+        }
+    ]
+}
